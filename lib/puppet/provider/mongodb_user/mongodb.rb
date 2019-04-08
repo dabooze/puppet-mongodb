@@ -74,15 +74,14 @@ Puppet::Type.type(:mongodb_user).provide(:mongodb, parent: Puppet::Provider::Mon
 
         if password_hash
         elsif @resource[:password]
-          password_hash = Puppet::Util::MongodbMd5er.md5(@resource[:username], @resource[:password])
+          password_hash = @resource[:password]
         end
         cmd_json = <<-EOS.gsub(%r{^\s*}, '').gsub(%r{$\n}, '')
 	{
 	  "createUser": "#{@resource[:username]}",
 	  "pwd": "#{password_hash}",
 	  "customData": {"createdBy": "Puppet Mongodb_user['#{@resource[:name]}']"},
-	  "roles": #{@resource[:roles].to_json},
-	  "digestPassword": false
+	  "roles": #{@resource[:roles].to_json}
 	}
 	EOS
 
@@ -122,8 +121,7 @@ Puppet::Type.type(:mongodb_user).provide(:mongodb, parent: Puppet::Provider::Mon
       cmd_json = <<-EOS.gsub(%r{^\s*}, '').gsub(%r{$\n}, '')
       {
           "updateUser": "#{@resource[:username]}",
-          "pwd": "#{@resource[:password_hash]}",
-          "digestPassword": false
+          "pwd": "#{@resource[:password_hash]}"
       }
       EOS
       mongo_eval("db.runCommand(#{cmd_json})", @resource[:database])
@@ -139,8 +137,7 @@ Puppet::Type.type(:mongodb_user).provide(:mongodb, parent: Puppet::Provider::Mon
       cmd_json = <<-EOS.gsub(%r{^\s*}, '').gsub(%r{$\n}, '')
       {
           "updateUser": "#{@resource[:username]}",
-          "pwd": "#{@resource[:password]}",
-          "digestpassword": true
+          "pwd": "#{@resource[:password]}"
       }
       EOS
 
